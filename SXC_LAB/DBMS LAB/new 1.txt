@@ -1,0 +1,23 @@
+DECLARE 
+	TYPE aarray IS VARRAY(10) of INTEGER;
+	i INTEGER;
+	t INTEGER;
+	m INTEGER;
+	flag INTEGER;
+	a aarray;
+	n INTEGER;
+	
+BEGIN
+	a:=aarray(100,90,80,70,60,50,40,30,20,10);
+	n := a.count();
+	dbms_output.put_line('Elements in Unsorted List--->');
+	FOR i IN 1..n
+	LOOP
+		dbms_output.put_line(a(i));
+	END LOOP;
+	m:=n;
+	flag:=0;
+		WHILE(flag=0)
+		LOOP
+		flag :=1;
+	
