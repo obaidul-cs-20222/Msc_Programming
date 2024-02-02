@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void heapsort(int *, int);
+void heapsort(int *, int); // Funtion prototype for Heap sort
 
 int main()
 {
@@ -17,6 +17,7 @@ int main()
 
     } while (n <= 0);
 
+    // Dynamic memory allocation for input array
     a = (int *)calloc(n, sizeof(int));
     printf("Enter the elements:\t");
     for (int i = 0; i < n; i++)
@@ -25,22 +26,24 @@ int main()
         scanf("%d", &a[i]);
     }
 
-    heapsort(a, n);
+    heapsort(a, n); // Calling the function for heap sort
     printf("\n\narray after heapsort:\n\n");
     for (int i = 0; i < n; i++)
-    {
+    { // printing the sorted array
 
-        printf("\t%d\t", a[i]);
+        printf("\n%d\t%d", i + 1, a[i]);
     }
     printf("\n");
-    free(a);
+    free(a); // Free the input array
     return 0;
 }
 
+// Function definition for heap sort
 void heapsort(int *a, int n)
 {
     int i, elt, s, f, ivalue;
 
+    // Building the initial max heap
     for (i = 1; i < n; i++)
     {
         elt = a[i];
@@ -55,6 +58,8 @@ void heapsort(int *a, int n)
         a[s] = elt;
     }
 
+    // Adjusting the heap to maintain the max heap property
+    // as well as putting the root value in its appropriate position in the array
     for (i = n - 1; i > 0; i--)
     {
         ivalue = a[i];

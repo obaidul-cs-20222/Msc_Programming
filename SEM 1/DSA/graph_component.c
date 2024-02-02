@@ -66,7 +66,7 @@ int main()
 
             printf("\t%d\t", dist[i]);
         }
-        printf("\nDo you want to appy bfs again?[0/1]:\t");
+        printf("\nDo you want to apply bfs again?[0/1]:\t");
         scanf("%d", &d);
         while (d != 0)
         {
