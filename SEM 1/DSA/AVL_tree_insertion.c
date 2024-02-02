@@ -243,3 +243,6 @@ struct node *leftbalance(node *root, int *tall)
     }
     return root;
 }
+
+// sample tree input: 5 6 7 8 4 2 10 3 1 9
+// inorder traversal should be in sorted order for this sample input
