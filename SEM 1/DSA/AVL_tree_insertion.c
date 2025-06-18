@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-// eh=0 rh=-1 lh=1
+// function prototypes
 
 struct node *getnode(int);
 struct node *insert(struct node *, struct node *, int *);
@@ -11,7 +11,7 @@ struct node *rightbalance(struct node *, int *);
 struct node *leftbalance(struct node *, int *);
 void inorder(struct node *);
 
-typedef struct node
+typedef struct node // defining the node structure
 {
     int data;
     struct node *left;
@@ -27,20 +27,19 @@ int main()
 
     printf("Enter the number of elements to be inserted: ");
     scanf("%d", &n);
-
+    printf("Enter the elements: ");
     for (int i = 0; i < n; i++)
     {
-        printf("Enter element %d: ", i + 1);
         scanf("%d", &item);
         node *newnode = getnode(item);
         root = insert(root, newnode, &tall);
     }
 
-    printf("\nInorder traversal of the AVL tree: \n");
+    printf("\nInorder traversal of the AVL tree: \n"); // inorder traversal of the tree
     inorder(root);
     printf("\n");
 }
-struct node *getnode(int item)
+struct node *getnode(int item) // initializing a node
 {
     struct node *p;
     p = (struct node *)malloc(sizeof(struct node));
@@ -109,7 +108,7 @@ struct node *insert(node *root, node *new, int *tall)
     return root;
 }
 
-struct node *rotateleft(node *p)
+struct node *rotateleft(node *p) // function definition for left rotation
 {
     node *temp;
     if (p == NULL)
@@ -129,7 +128,7 @@ struct node *rotateleft(node *p)
     return temp;
 }
 
-struct node *rotateright(node *p)
+struct node *rotateright(node *p) // function definition for right rotation
 {
     node *temp;
     if (p == NULL)
@@ -192,17 +191,6 @@ struct node *rightbalance(node *root, int *tall)
     return root;
 }
 
-void inorder(node *start)
-{
-    if (start != NULL)
-    {
-
-        inorder(start->left);
-        printf("\t%d \t", start->data);
-        inorder(start->right);
-    }
-}
-
 struct node *leftbalance(node *root, int *tall)
 {
     node *ls = root->left;
@@ -242,6 +230,17 @@ struct node *leftbalance(node *root, int *tall)
         *tall = 0;
     }
     return root;
+}
+
+void inorder(node *start)
+{
+    if (start != NULL)
+    {
+
+        inorder(start->left);
+        printf("%d \t", start->data);
+        inorder(start->right);
+    }
 }
 
 // sample tree input: 5 6 7 8 4 2 10 3 1 9

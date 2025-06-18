@@ -1,0 +1,163 @@
+import numpy as np
+
+class HiddenLayer:
+    def __init__(self, input_size, hidden_size):
+        """
+        Initialize the hidden layer with random weights and biases.
+        """
+        self.weights = np.random.uniform(-1, 1, (hidden_size, input_size))
+        self.bias = np.ones((hidden_size, 1))
+
+    def activate(self, inputs):
+        """
+        Perform the forward pass for the hidden layer.
+        """
+        net_input = np.dot(self.weights, inputs) + self.bias
+        return np.where(net_input >= 0, 1, -1), net_input  # Return both output and net input
+
+class OutputLayer:
+    def __init__(self, hidden_size, output_size):
+        """
+        Initialize the output layer with random weights and biases.
+        """
+        self.weights = np.random.uniform(-1, 1, (output_size, hidden_size))
+        self.bias = np.ones((output_size, 1))
+
+    def activate(self, hidden_output):
+        """
+        Perform the forward pass for the output layer.
+        """
+        net_input = np.dot(self.weights, hidden_output) + self.bias
+        return np.where(net_input >= 0, 1, -1)  # Return the final output
+
+class MadalineNetwork:
+    def __init__(self, input_size, hidden_size, output_size, learning_rate=0.5, max_hidden_neurons=10):
+        """
+        Initialize the Madaline network with the given parameters.
+        """
+        self.input_size = input_size
+        self.hidden_size = hidden_size
+        self.output_size = output_size
+        self.learning_rate = learning_rate
+        self.max_hidden_neurons = max_hidden_neurons
+
+        # Initialize hidden and output layers
+        self.hidden_layer = HiddenLayer(input_size, hidden_size)
+        self.output_layer = OutputLayer(hidden_size, output_size)
+
+    def forward_pass(self, inputs):
+        """
+        Perform a forward pass through the network.
+        """
+        # Hidden layer computation
+        self.hidden_output, self.hidden_net_input = self.hidden_layer.activate(inputs)
+
+        # Output layer computation
+        self.final_output = self.output_layer.activate(self.hidden_output)
+        return self.final_output
+
+    def train(self, training_data, targets, max_epochs=100, error_threshold=0.1):
+        """
+        Train the network using the MR-I algorithm.
+        """
+        for epoch in range(max_epochs):
+            total_error = 0
+            for inputs, target in zip(training_data, targets):
+                inputs = inputs.reshape(self.input_size, 1)
+                target = target.reshape(self.output_size, 1)
+
+                # Forward pass
+                output = self.forward_pass(inputs)
+
+                # Calculate error
+                error = np.sum(np.abs(target - output))
+                total_error += error
+
+                # Update weights if output does not match target
+                if not np.array_equal(output, target):
+                    self.update_weights(inputs, target, output)
+            
+            print(f"Epoch {epoch + 1}/{max_epochs}, Total Error: {total_error}")
+
+            # Adjust topology dynamically based on error
+            if total_error > error_threshold and self.hidden_size < self.max_hidden_neurons:
+                self.add_hidden_neuron()
+            elif total_error == 0:
+                print("Training converged.")
+                break
+
+    def update_weights(self, inputs, target, output):
+        """
+        Update weights using the MR-I rule.
+        """
+        if target == 1:
+            # Find the hidden neuron with net input closest to zero
+            closest_idx = np.argmin(np.abs(self.hidden_net_input))
+            delta = self.learning_rate * (1 - self.hidden_net_input[closest_idx])
+            self.hidden_layer.bias[closest_idx] += delta
+            self.hidden_layer.weights[closest_idx] += delta * inputs.flatten()
+        elif target == -1:
+            # Update all hidden neurons with positive net input
+            for i in range(self.hidden_size):
+                if self.hidden_net_input[i] > 0:
+                    delta = self.learning_rate * (-1 - self.hidden_net_input[i])
+                    self.hidden_layer.bias[i] += delta
+                    self.hidden_layer.weights[i] += delta * inputs.flatten()
+
+        # Update output layer weights
+        delta_output = target - output
+        self.output_layer.weights += self.learning_rate * delta_output * self.hidden_output.T
+        self.output_layer.bias += self.learning_rate * delta_output
+
+    def add_hidden_neuron(self):
+        """
+        Dynamically add a hidden neuron to the network.
+        """
+        # Add new weights and bias for the hidden neuron
+        new_weights = np.random.uniform(-1, 1, (1, self.input_size))
+        new_bias = np.ones((1, 1))
+
+        # Update hidden layer weights and biases
+        self.hidden_layer.weights = np.vstack([self.hidden_layer.weights, new_weights])
+        self.hidden_layer.bias = np.vstack([self.hidden_layer.bias, new_bias])
+
+        # Update output layer weights for the new hidden neuron
+        new_output_weights = np.random.uniform(-1, 1, (self.output_size, 1))
+        self.output_layer.weights = np.hstack([self.output_layer.weights, new_output_weights])
+
+        # Increment hidden layer size
+        self.hidden_size += 1
+        print(f"Added a new hidden neuron. Total hidden neurons: {self.hidden_size}")
+
+    def predict(self, inputs):
+        """
+        Predict the output for the given inputs.
+        """
+        return self.forward_pass(inputs.reshape(self.input_size, 1))
+
+# Main function to train and test the Madaline network
+if __name__ == "__main__":
+    # Network parameters
+    input_size = 2
+    initial_hidden_size = 2
+    output_size = 1
+    learning_rate = 0.5
+    max_hidden_neurons = 20
+    max_epochs = 50
+
+    # Initialize Madaline network
+    madaline = MadalineNetwork(input_size, initial_hidden_size, output_size, learning_rate, max_hidden_neurons)
+
+    # Training data for bipolar XOR
+    training_data = np.array([[1, 1], [1, -1], [-1, 1], [-1, -1]])
+    targets = np.array([[-1], [1], [1], [-1]])
+
+    # Train the network
+    print("Training the Madaline network:")
+    madaline.train(training_data, targets, max_epochs)
+
+    # Test the network
+    print("\nTesting the network:")
+    for inputs in training_data:
+        output = madaline.predict(inputs)
+        print(f"Input: {inputs}, Output: {output.flatten()[0]}")
